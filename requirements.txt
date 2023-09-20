@@ -1,0 +1,3 @@
+fastapi[all]
+sqlalchemy==1.4.23
+psychopg2==2.9.1
