@@ -19,11 +19,13 @@ class Post(PostBase):
 class UserBase(BaseModel):
     name: str
     email: EmailStr
-    password: str
 
 class UserCreate(UserBase):
     pass
+    password: str
+    
 
+ 
 class User(UserBase):
     id: int
     created_at: datetime

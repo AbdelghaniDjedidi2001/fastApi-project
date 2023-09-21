@@ -38,6 +38,9 @@ def update_post(db: Session, post_id: int, post: schemas.PostCreate):
     return db_post
 
 
+def get_user(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.id == user_id).first()
+
 def create_user(db: Session, user: schemas.UserCreate):
     db_user = models.User(**user.model_dump())
     db.add(db_user)

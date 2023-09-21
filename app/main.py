@@ -1,14 +1,18 @@
 from fastapi import FastAPI, Request , Response, status, HTTPException, Depends 
 from typing import List
 from sqlalchemy.orm import Session
+from . import crud, models, schemas, utlis
+from .database import engine , get_db 
 
-from . import crud, models, schemas
-from .database import engine , get_db
+
+
 
 models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
+
+
 
 
 @app.get("/")
@@ -69,4 +73,17 @@ async def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(d
 
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.User)
 async def creat_user(user: schemas.UserCreate, db: Session = Depends(dependency=get_db)):
+    password_hash = utlis.get_password_hash(user.password)
+    user.password = password_hash
     return crud.create_user(db, user)
+
+
+@app.get("/users/{id}", response_model=schemas.User)
+async def get_user(id: int, response: Response, db: Session = Depends(dependency=get_db)):
+    user = crud.get_user(db, id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"User with id {id} not found",
+            )
+    return user
