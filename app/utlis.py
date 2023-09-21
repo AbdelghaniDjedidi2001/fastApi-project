@@ -3,7 +3,6 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 

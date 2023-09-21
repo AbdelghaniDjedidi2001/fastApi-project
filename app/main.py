@@ -1,18 +1,18 @@
-from fastapi import FastAPI, Request , Response, status, HTTPException, Depends 
-from typing import List
-from sqlalchemy.orm import Session
-from . import crud, models, schemas, utlis
-from .database import engine , get_db 
+from fastapi import FastAPI
+from .models import Base 
+from .database import engine  
+from .routers.user import user 
+from .routers.post import post
 
 
-
-
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
 
 
+app.include_router(user.router)
+app.include_router(post.router)
 
 
 @app.get("/")
@@ -21,69 +21,4 @@ async def root():
 
 
 
-@app.get("/posts", response_model=List[schemas.Post])
-async def get_posts(db: Session = Depends(dependency=get_db)):
-    posts = crud.get_posts(db) 
-    return posts
-    
 
-
-
-@app.get("/posts/{id}", response_model=schemas.Post)
-async def get_post(id: int, response: Response, db: Session = Depends(dependency=get_db)):
-    post = crud.get_post(db, id)
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Post with id {id} not found",
-            )
-    return post
-
-
-
-@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
-async def creat_post(post: schemas.PostCreate, db: Session = Depends(dependency=get_db)):
-    post = crud.create_post(db, post)
-    return post
-
-
-
-@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post(id: int, db: Session = Depends(dependency=get_db)):
-    post = crud.delete_post(db, id)
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Post with id {id} not found",
-            )
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-
-@app.put("/posts/{id}", status_code=status.HTTP_202_ACCEPTED, response_model=schemas.Post)
-async def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(dependency=get_db)):
-    post = crud.update_post(db, id, post)
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Post with id {id} not found",
-            )
-    return post
-
-
-@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.User)
-async def creat_user(user: schemas.UserCreate, db: Session = Depends(dependency=get_db)):
-    password_hash = utlis.get_password_hash(user.password)
-    user.password = password_hash
-    return crud.create_user(db, user)
-
-
-@app.get("/users/{id}", response_model=schemas.User)
-async def get_user(id: int, response: Response, db: Session = Depends(dependency=get_db)):
-    user = crud.get_user(db, id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"User with id {id} not found",
-            )
-    return user
