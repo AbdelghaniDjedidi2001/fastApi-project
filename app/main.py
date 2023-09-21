@@ -66,3 +66,7 @@ async def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(d
             )
     return post
 
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.User)
+async def creat_user(user: schemas.UserCreate, db: Session = Depends(dependency=get_db)):
+    return crud.create_user(db, user)

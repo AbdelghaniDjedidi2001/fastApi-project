@@ -37,3 +37,10 @@ def update_post(db: Session, post_id: int, post: schemas.PostCreate):
     db.refresh(db_post)
     return db_post
 
+
+def create_user(db: Session, user: schemas.UserCreate):
+    db_user = models.User(**user.model_dump())
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
