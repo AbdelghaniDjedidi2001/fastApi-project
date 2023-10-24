@@ -13,6 +13,8 @@ class Post(Base):
     content = Column(String, nullable=False)
     published = Column(Boolean, server_default="TRUE",nullable=False)
     craeted_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default= text("now()"))
+    user_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"),nullable=False)
+    user = relationship("User")
 
 
 class User(Base):
@@ -22,3 +24,11 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default= text("now()"))
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True, index=True, nullable=False)
+    value = Column(Integer, nullable=False)
+    

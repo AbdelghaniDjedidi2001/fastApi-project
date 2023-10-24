@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 
 from . import oauth2
 from ...database import get_db
-from . import auth_crud as crud, auth_schemas
-from ...utlis import  verify_password
+from . import auth_crud as crud
+
+from ... import  schemas , utlis
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 
 router = APIRouter(
@@ -13,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.post("/login",response_model=auth_schemas.Token)
+@router.post("/login",response_model=schemas.Token)
 async def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, user_credentials.username)
     if not user:
@@ -21,7 +22,7 @@ async def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Ses
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid credentials",
         )
-    if not verify_password(user_credentials.password, user.password):
+    if not utlis.verify_password(user_credentials.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid credentials",
